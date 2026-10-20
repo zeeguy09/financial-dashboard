@@ -6,41 +6,60 @@ st.set_page_config(
 )
 
 st.title("📊 Zeeshan's Live Financial Dashboard (October 2026)")
-st.markdown("Automated tracking for Operational, Rental, and Capital accounts.")
+st.markdown("Live operational, rental, and capital accounts ledger.")
 
-# For now, this connects to a sample view. We will link your Google Sheet next!
-data = {
-    "Date": ["2026-10-01", "2026-10-06", "2026-10-20", "2026-10-20"],
-    "Type": ["Expense", "Income", "Income", "Income"],
-    "Description": [
-        "Foodpanda",
-        "NGTSOL Salary",
-        "Zeeshan Tailor (Shop 1 Rent)",
-        "581 D House Rent",
-    ],
-    "Category": [
-        "Food & Dining",
-        "Salary / Business",
-        "Rental Income",
-        "Rental Income",
-    ],
-    "Amount (PKR)": [2079.99, 287894.00, 90000.00, 125000.00],
-    "Source": ["HBL CC", "UBL", "JazzCash", "HBL Account"],
-}
+# --- CONNECT TO GOOGLE SHEET ---
+# Replace the URL below with your public Google Sheet link
+sheet_url = "https://docs.google.com/spreadsheets/d/1CnyHjNVKo37030KzDDBEBPfpOUqF0bVnkKeoYyViKJU/edit?usp=sharing"
+csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
-df = pd.DataFrame(data)
 
-# Top Metrics Row
-col1, col2, col3 = st.columns(3)
-with col1:
+@st.cache_data(ttl=60)
+def load_data(url):
+  return pd.read_csv(url)
+
+
+try:
+  df = load_data(csv_url)
+
+  # --- TOP METRICS ---
+  col1, col2, col3 = st.columns(3)
+  with col1:
     st.metric("Total Incomes", "Rs 885,270.00")
-with col2:
-    st.metric("Operational Expenses", "Rs 717,379.41")
-with col3:
+  with col2:
+    st.metric("Operational Expenses", "Rs 721,598.90")
+  with col3:
     st.metric("Capital Assets (Land)", "Rs 12,504,748.80", "ShareefPura")
 
-st.divider()
+  st.divider()
 
-# Tables and Views
-st.subheader("Master Transaction Ledger")
-st.dataframe(df, use_container_width=True)
+  # --- TABS FOR SEPARATION ---
+  tab1, tab2, tab3 = st.tabs(
+      ["Master Ledger", "Property Rentals", "Capital & Perks (NGTSOL)"]
+  )
+
+  with tab1:
+    st.subheader("All Logged Transactions")
+    st.dataframe(df, use_container_width=True)
+
+  with tab2:
+    st.subheader("Rental Incomes")
+    if "Category" in df.columns:
+      rent_df = df[df["Category"].str.contains("Rental", case=False, na=False)]
+      st.dataframe(rent_df, use_container_width=True)
+    else:
+      st.write("Category column not found.")
+
+  with tab3:
+    st.subheader("Special Assets & Perks")
+    st.info(
+        "Land Purchase: 4 Acres in ShareefPura Near Kala Khatai Road (~Rs 12.5M"
+        " Alfalah Payorders)"
+    )
+    st.info("Fuel Perks: Total Infini Cards managed via NGTSOL.")
+
+except Exception as e:
+  st.error(
+      "Could not load data from Google Sheet. Please check the public sharing"
+      f" link. Error: {e}"
+  )
