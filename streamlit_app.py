@@ -9,7 +9,7 @@ st.title("📊 Zeeshan's Live Financial Dashboard (October 2026)")
 st.markdown("Live operational, rental, and capital accounts ledger.")
 
 # --- CONNECT TO GOOGLE SHEET ---
-sheet_url = "YOUR_GOOGLE_SHEET_URL_HERE"
+sheet_url = "https://docs.google.com/spreadsheets/d/1CnyHjNVKo37030KzDDBEBPfpOUqF0bVnkKeoYyViKJU/edit?usp=sharing"
 csv_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
 
